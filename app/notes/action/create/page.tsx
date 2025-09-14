@@ -1,21 +1,19 @@
-import css from "./CreateNote.module.css";
 import NoteForm from "@/components/NoteForm/NoteForm";
+import css from "./CreateNote.module.css";
 import { Metadata } from "next";
-
 export const metadata: Metadata = {
-    title: "Create Note",
-    description: "Create a new note",
+    title: "New note",
+    description: "Here you can add a new notes and save it for later reference ",
     openGraph: {
-        title: "Create Note",
-        description: "Create a new note",
-        url: "/notes/action/create",
-        siteName: "NoteHub",
+        title: "New note",
+        description: "Here you can add a new notes and save it for later reference",
+        url: "https://notehub.versel.app/notes/action/create",
         images: [
             {
                 url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
                 width: 1200,
                 height: 630,
-                alt: "Create Note",
+                alt: "NoteHub",
             },
         ],
     },
@@ -26,8 +24,7 @@ export default function CreateNote() {
         <main className={css.main}>
             <div className={css.container}>
                 <h1 className={css.title}>Create note</h1>
-                <NoteForm onClose={() => { }} />
-
+                <NoteForm />
             </div>
         </main>
     );
