@@ -15,15 +15,15 @@ export default function NoteForm() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Здесь вызываем API для создания заметки
+        // Здесь можно вызвать API для создания заметки
         // createNoteAPI(draft)
 
-        clearDraft(); // Очистка draft после успешного создания
-        window.history.back(); // Возврат на предыдущую страницу
+        clearDraft();
+        window.history.back();
     };
 
     const handleCancel = () => {
-        window.history.back(); // Возврат без очистки draft
+        window.history.back();
     };
 
     return (
