@@ -1,39 +1,68 @@
-'use client';
+"use client";
 
-import { useNoteStore } from '@/lib/store/noteStore';
-import css from './NoteForm.module.css';
+import { useNoteStore } from "@/lib/store/noteStore";
+import css from "./NoteForm.module.css";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { createNote } from "@/lib/api";
 
-interface NoteFormProps {
+// Добавляем тип для тега
+type NoteTag = "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
+
+type NoteFormProps = {
     onClose: () => void;
-}
+};
 
 export default function NoteForm({ onClose }: NoteFormProps) {
     const { draft, setDraft, clearDraft } = useNoteStore();
+    const queryClient = useQueryClient();
+    const router = useRouter();
+
+    const mutation = useMutation({
+        mutationFn: createNote,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["notes"] });
+            clearDraft();
+            onClose(); // закрываем модалку после успешного создания
+        },
+    });
 
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >
     ) => {
-        setDraft({ ...draft, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === "tag") {
+            setDraft({ ...draft, [name]: value as NoteTag });
+        } else {
+            setDraft({ ...draft, [name]: value });
+        }
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Здесь можно вызвать API для создания заметки
-        // createNoteAPI(draft)
-        clearDraft();
-        window.history.back();
-        onClose(); // закрываем модальное окно после submit
+        // Приводим tag к нужному типу перед отправкой
+        mutation.mutate({
+            ...draft,
+            tag: draft.tag as NoteTag,
+        });
     };
 
     const handleCancel = () => {
-        onClose(); // закрываем модальное окно при отмене
+        onClose();
     };
 
     return (
         <form className={css.form} onSubmit={handleSubmit}>
             <div className={css.formGroup}>
                 <label htmlFor="title">Title</label>
-                <input id="title" name="title" value={draft.title} onChange={handleChange} />
+                <input
+                    id="title"
+                    name="title"
+                    value={draft.title}
+                    onChange={handleChange}
+                />
             </div>
 
             <div className={css.formGroup}>
@@ -49,7 +78,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
 
             <div className={css.formGroup}>
                 <label htmlFor="tag">Tag</label>
-                <select name="tag" value={draft.tag} onChange={handleChange}>
+                <select
+                    name="tag"
+                    value={draft.tag}
+                    onChange={handleChange}
+                >
                     <option value="Todo">Todo</option>
                     <option value="Work">Work</option>
                     <option value="Personal">Personal</option>
@@ -59,10 +92,20 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             </div>
 
             <div className={css.actions}>
-                <button type="button" className={css.cancelButton} onClick={handleCancel}>
+                <button
+                    type="button"
+                    className={css.cancelButton}
+                    onClick={handleCancel}
+                >
                     Cancel
                 </button>
-                <button type="submit" className={css.submitButton}>Create note</button>
+                <button
+                    type="submit"
+                    className={css.submitButton}
+                    disabled={mutation.status === "pending"}
+                >
+                    {mutation.status === "pending" ? "Creating..." : "Create note"}
+                </button>
             </div>
         </form>
     );

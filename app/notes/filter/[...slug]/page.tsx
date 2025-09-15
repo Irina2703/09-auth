@@ -6,20 +6,42 @@ import {
     HydrationBoundary,
     dehydrate,
 } from "@tanstack/react-query";
+import type { Metadata } from "next";
 
 type Props = {
     params: Promise<{ slug: string[] }>;
 };
 
-export default async function App({ params }: Props) {
+// 🆕 Генеруємо метадані динамічно
+export async function generateMetadata(
+    { params }: Props
+): Promise<Metadata> {
+    const { slug } = await params;
+    const tag = slug[0] === "All" ? undefined : slug[0];
+
+    return {
+        title: tag ? `Notes tagged: ${tag}` : "All Notes",
+        description: tag
+            ? `Browse notes with tag: ${tag}`
+            : "Browse all notes",
+        openGraph: {
+            title: tag ? `Notes tagged: ${tag}` : "All Notes",
+            description: tag
+                ? `Browse notes with tag: ${tag}`
+                : "Browse all notes",
+            url: `/notes/filter/${tag ?? "All"}`,
+        },
+    };
+}
+
+export default async function NotesPage({ params }: Props) {
     const queryClient = new QueryClient();
     const { slug } = await params;
-
-    const tag = slug[0] === "All" ? undefined : slug[0]; // undefined = всі нотатки
+    const tag = slug[0] === "All" ? undefined : slug[0];
 
     await queryClient.prefetchQuery({
         queryKey: ["notes", { query: "", page: 1, tag }],
-        queryFn: () => fetchNotes(1, tag ?? ""), // передаємо тег
+        queryFn: () => fetchNotes(1, tag ?? ""),
     });
 
     return (
