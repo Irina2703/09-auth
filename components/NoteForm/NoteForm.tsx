@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useNoteStore } from '@/lib/store/noteStore';
 import css from './NoteForm.module.css';
 

@@ -1,8 +1,6 @@
-'use client';
-
 import NoteForm from '@/components/NoteForm/NoteForm';
 import css from './CreateNote.module.css';
-import type { Metadata } from 'next'; // ✅ исправлено
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'Create Note - NoteHub',
@@ -27,6 +25,7 @@ export default function CreateNote() {
         <main className={css.main}>
             <div className={css.container}>
                 <h1 className={css.title}>Create note</h1>
+                {/* NoteForm остаётся клиентским */}
                 <NoteForm />
             </div>
         </main>
