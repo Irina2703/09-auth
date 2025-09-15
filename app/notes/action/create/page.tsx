@@ -26,7 +26,9 @@ export default function CreateNote() {
             <div className={css.container}>
                 <h1 className={css.title}>Create note</h1>
                 {/* NoteForm остаётся клиентским */}
-                <NoteForm />
+                <NoteForm onClose={function (): void {
+                    throw new Error('Function not implemented.');
+                }} />
             </div>
         </main>
     );

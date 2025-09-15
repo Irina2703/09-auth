@@ -1,10 +1,13 @@
 'use client';
 
-
 import { useNoteStore } from '@/lib/store/noteStore';
 import css from './NoteForm.module.css';
 
-export default function NoteForm() {
+interface NoteFormProps {
+    onClose: () => void;
+}
+
+export default function NoteForm({ onClose }: NoteFormProps) {
     const { draft, setDraft, clearDraft } = useNoteStore();
 
     const handleChange = (
@@ -15,16 +18,15 @@ export default function NoteForm() {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         // Здесь можно вызвать API для создания заметки
         // createNoteAPI(draft)
-
         clearDraft();
         window.history.back();
+        onClose(); // закрываем модальное окно после submit
     };
 
     const handleCancel = () => {
-        window.history.back();
+        onClose(); // закрываем модальное окно при отмене
     };
 
     return (
