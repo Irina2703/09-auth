@@ -2,7 +2,7 @@
 
 import NoteForm from '@/components/NoteForm/NoteForm';
 import css from './CreateNote.module.css';
-import { Metadata } from 'next';
+import type { Metadata } from 'next'; // ✅ исправлено
 
 export const metadata: Metadata = {
     title: 'Create Note - NoteHub',
