@@ -8,6 +8,14 @@ export const metadata: Metadata = {
         title: "Create Note",
         description: "Form for creating a new note",
         url: "/notes/action/create",
+        images: [
+            {
+                url: "/og-create-note.png",
+                width: 800,
+                height: 600,
+                alt: "Create Note",
+            },
+        ],
     },
 };
 

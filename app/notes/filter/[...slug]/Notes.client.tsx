@@ -1,4 +1,5 @@
 "use client";
+
 import SearchBox from "@/components/SearchBox/SearchBox";
 import css from "./App.module.css";
 import { useState, useEffect } from "react";
@@ -7,8 +8,7 @@ import { fetchNotes } from "@/lib/api";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import Pagination from "@/components/Pagination/Pagination";
 import NoteList from "@/components/NoteList/NoteList";
-import Modal from "@/components/Modal/Modal";
-import NoteForm from "@/components/NoteForm/NoteForm";
+import { useRouter } from "next/navigation";
 
 type NoteListClientProps = { tag?: string };
 
@@ -16,9 +16,7 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
     const [searchText, setSearchText] = useState("");
     const [debouncedText] = useDebounce(searchText, 500);
     const [page, setPage] = useState(1);
-    const [isModalOpen, setModalOpen] = useState(false);
-    const openModal = () => setModalOpen(true);
-    const closeModal = () => setModalOpen(false);
+    const router = useRouter();
 
     useEffect(() => {
         setPage(1);
@@ -32,6 +30,10 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
 
     const totalPages = data?.totalPages || 0;
 
+    const goToCreatePage = () => {
+        router.push("/notes/action/create");
+    };
+
     return (
         <div className={css.app}>
             <header className={css.toolbar}>
@@ -43,7 +45,7 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
                         onPageChange={setPage}
                     />
                 )}
-                <button className={css.button} onClick={openModal}>
+                <button className={css.button} onClick={goToCreatePage}>
                     Create note +
                 </button>
             </header>
@@ -54,15 +56,7 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
                 {!isLoading && !isError && data?.notes?.length === 0 && (
                     <p>No notes found</p>
                 )}
-                {data?.notes && data.notes.length > 0 && (
-                    <NoteList notes={data.notes} />
-                )}
-
-                {isModalOpen && (
-                    <Modal onClose={closeModal}>
-                        <NoteForm onClose={closeModal} />
-                    </Modal>
-                )}
+                {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
             </main>
         </div>
     );

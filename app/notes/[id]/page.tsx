@@ -1,8 +1,4 @@
-import {
-    QueryClient,
-    HydrationBoundary,
-    dehydrate,
-} from "@tanstack/react-query";
+import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { fetchNoteById } from "@/lib/api";
 import NoteDetailsClient from "./NoteDetails.client";
 import type { Metadata } from "next";
@@ -11,10 +7,7 @@ type Props = {
     params: Promise<{ id: string }>;
 };
 
-// 🆕 Генеруємо метадані динамічно
-export async function generateMetadata(
-    { params }: Props
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { id } = await params;
     const note = await fetchNoteById(id);
 
@@ -25,6 +18,14 @@ export async function generateMetadata(
             title: note?.title ?? "Note",
             description: note?.content?.slice(0, 120) ?? "Note details",
             url: `/notes/${id}`,
+            images: [
+                {
+                    url: "/og-note.png",
+                    width: 800,
+                    height: 600,
+                    alt: note?.title ?? "Note Image",
+                },
+            ],
         },
     };
 }
