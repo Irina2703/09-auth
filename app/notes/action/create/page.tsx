@@ -1,3 +1,5 @@
+"use client";
+
 import type { Metadata } from "next";
 import NoteForm from "@/components/NoteForm/NoteForm";
 
