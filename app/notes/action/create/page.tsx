@@ -3,16 +3,18 @@
 import type { Metadata } from "next";
 import NoteForm from "@/components/NoteForm/NoteForm";
 
+const BASE_URL = "08-zustand-olive-rho.vercel.app";
+
 export const metadata: Metadata = {
     title: "Create Note",
     description: "Create a new note in your collection",
     openGraph: {
         title: "Create Note",
         description: "Form for creating a new note",
-        url: "/notes/action/create",
+        url: `${BASE_URL}/notes/action/create`,
         images: [
             {
-                url: "/og-create-note.png",
+                url: `${BASE_URL}/og-create-note.png`,
                 width: 800,
                 height: 600,
                 alt: "Create Note",
