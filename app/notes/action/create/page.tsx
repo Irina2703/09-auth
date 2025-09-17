@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import NoteForm from "@/components/NoteForm/NoteForm";
 
-const BASE_URL = "08-zustand-olive-rho.vercel.app";
+const BASE_URL = "https://08-zustand-olive-rho.vercel.app";
 
 export const metadata: Metadata = {
     title: "Create Note",
@@ -14,9 +14,9 @@ export const metadata: Metadata = {
         url: `${BASE_URL}/notes/action/create`,
         images: [
             {
-                url: `${BASE_URL}/og-create-note.png`,
-                width: 800,
-                height: 600,
+                url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+                width: 1200,
+                height: 630,
                 alt: "Create Note",
             },
         ],
