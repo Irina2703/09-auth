@@ -1,8 +1,12 @@
 import css from "./NotesClient.module.css";
 import NoteListClient from "./Notes.client";
-import { fetchNotes } from "@/lib/api";
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import type { Metadata } from "next";
+import { fetchServerNotes } from "@/lib/api/serverApi";
+import {
+    QueryClient,
+    HydrationBoundary,
+    dehydrate,
+} from "@tanstack/react-query";
+import { Metadata } from "next";
 
 type Props = {
     params: Promise<{ slug: string[] }>;
@@ -10,37 +14,35 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
-    const tag = slug[0] === "All" ? undefined : slug[0];
-
     return {
-        title: tag ? `Notes tagged: ${tag}` : "All Notes",
-        description: tag ? `Browse notes with tag: ${tag}` : "Browse all notes",
+        title: `${slug[0]} Notes`,
+        description: `${slug[0]} Notes`,
         openGraph: {
-            title: tag ? `Notes tagged: ${tag}` : "All Notes",
-            description: tag ? `Browse notes with tag: ${tag}` : "Browse all notes",
-            url: `/notes/filter/${tag ?? "All"}`,
+            title: `${slug[0]} Notes`,
+            description: `${slug[0]} Notes`,
+            url: `https://09-auth-ten-teal.vercel.app/${slug.join("/")}`,
             images: [
                 {
-                    url: "/og-default.png",
-                    width: 800,
-                    height: 600,
-                    alt: "Notes OG Image",
+                    url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: `${slug[0]} Notes`,
                 },
             ],
         },
     };
 }
 
-export default async function NotesPage({ params }: Props) {
+export default async function App({ params }: Props) {
     const queryClient = new QueryClient();
     const { slug } = await params;
+
     const tag = slug[0] === "All" ? undefined : slug[0];
 
-    await queryClient.prefetchQuery({
-        queryKey: ["notes", { query: "", page: 1, tag }],
-        queryFn: () => fetchNotes(1, tag ?? ""),
+    queryClient.prefetchQuery({
+        queryKey: ["notes", { query: "", page: 1, tag: tag }],
+        queryFn: () => fetchServerNotes(1, "", tag),
     });
-
     return (
         <div className={css.app}>
             <HydrationBoundary state={dehydrate(queryClient)}>

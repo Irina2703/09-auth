@@ -1,10 +1,9 @@
 "use client";
-
 import SearchBox from "@/components/SearchBox/SearchBox";
 import css from "./App.module.css";
 import { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
-import { fetchNotes } from "@/lib/api";
+import { fetchNotes } from "@/lib/api/clientApi";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import Pagination from "@/components/Pagination/Pagination";
 import NoteList from "@/components/NoteList/NoteList";
@@ -20,19 +19,15 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
 
     useEffect(() => {
         setPage(1);
-    }, [debouncedText, tag]);
+    }, [debouncedText]);
 
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ["notes", debouncedText, page, tag],
-        queryFn: () => fetchNotes(page, debouncedText || "", tag || ""),
+        queryFn: () => fetchNotes(page, debouncedText || "", tag),
         placeholderData: keepPreviousData,
     });
 
     const totalPages = data?.totalPages || 0;
-
-    const goToCreatePage = () => {
-        router.push("/notes/action/create");
-    };
 
     return (
         <div className={css.app}>
@@ -45,7 +40,10 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
                         onPageChange={setPage}
                     />
                 )}
-                <button className={css.button} onClick={goToCreatePage}>
+                <button
+                    className={css.button}
+                    onClick={() => router.push("/notes/action/create")}
+                >
                     Create note +
                 </button>
             </header>
@@ -56,7 +54,9 @@ export default function NoteListClient({ tag }: NoteListClientProps) {
                 {!isLoading && !isError && data?.notes?.length === 0 && (
                     <p>No notes found</p>
                 )}
-                {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
+                {data?.notes && data.notes.length > 0 && (
+                    <NoteList notes={data.notes} />
+                )}
             </main>
         </div>
     );

@@ -14,11 +14,6 @@ export default function CreateNoteClient() {
     const router = useRouter();
 
     return (
-        <NoteForm
-            onClose={() => {
-                // Закрываем страницу создания и возвращаемся на список заметок
-                router.push("/notes");
-            }}
-        />
+        <NoteForm />
     );
 }

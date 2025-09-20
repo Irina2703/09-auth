@@ -1,91 +1,93 @@
 "use client";
-
-import { useNoteStore } from "@/lib/store/noteStore";
 import css from "./NoteForm.module.css";
+import { createNote, type CreateNoteParams } from "@/lib/api/clientApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { createNote } from "@/lib/api/api";
+import { } from "@/lib/store/noteStore";
+import { useNoteStore } from "@/lib/store/noteStore";
 
-type NoteTag = "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
-
-type NoteFormProps = {
-    onClose: () => void;
-};
-
-export default function NoteForm({ onClose }: NoteFormProps) {
-    const { draft, setDraft, clearDraft } = useNoteStore();
-    const queryClient = useQueryClient();
+export default function NoteForm() {
     const router = useRouter();
-
-    const mutation = useMutation({
-        mutationFn: createNote,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["notes"] });
-            clearDraft();
-            onClose();
-        },
-    });
+    const { draft, setDraft, clearDraft } = useNoteStore
+        ();
+    const client = useQueryClient();
 
     const handleChange = (
-        e: React.ChangeEvent<
+        event: React.ChangeEvent<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
         >
     ) => {
-        const { name, value } = e.target;
-        if (name === "tag") {
-            setDraft({ ...draft, [name]: value as NoteTag });
-        } else {
-            setDraft({ ...draft, [name]: value });
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        mutation.mutate({
+        setDraft({
             ...draft,
-            tag: draft.tag as NoteTag,
+            [event.target.name]: event.target.value,
         });
     };
 
-    const handleCancel = () => {
-        onClose();
+    const createNoteMutation = useMutation({
+        mutationFn: createNote,
+        onSuccess: () => {
+            clearDraft();
+            client.invalidateQueries({ queryKey: ["notes"] });
+            router.back();
+        },
+    });
+
+    const createNewNote = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+
+        const newNote: CreateNoteParams = {
+            title: String(formData.get("title") ?? ""),
+            content: String(formData.get("content") ?? ""),
+            tag: String(formData.get("tag")) as CreateNoteParams["tag"],
+        };
+
+        createNoteMutation.mutate(newNote);
     };
 
     return (
-        <form className={css.form} onSubmit={handleSubmit}>
+        <form className={css.form} onSubmit={createNewNote}>
             <div className={css.formGroup}>
-                <label htmlFor="title">Заголовок</label>
+                <label htmlFor="title">Title</label>
                 <input
                     id="title"
+                    type="text"
                     name="title"
-                    value={draft.title}
+                    className={css.input}
+                    value={draft?.title}
                     onChange={handleChange}
+                    required
                 />
             </div>
 
             <div className={css.formGroup}>
-                <label htmlFor="content">Содержание</label>
+                <label htmlFor="content">Content</label>
                 <textarea
                     id="content"
                     name="content"
                     rows={8}
-                    value={draft.content}
+                    className={css.textarea}
+                    value={draft?.content}
                     onChange={handleChange}
+                    required
                 />
             </div>
 
             <div className={css.formGroup}>
-                <label htmlFor="tag">Тег</label>
+                <label htmlFor="tag">Tag</label>
                 <select
+                    id="tag"
                     name="tag"
-                    value={draft.tag}
+                    className={css.select}
                     onChange={handleChange}
+                    value={draft?.tag}
+                    required
                 >
-                    <option value="Todo">Дела</option>
-                    <option value="Work">Работа</option>
-                    <option value="Personal">Личное</option>
-                    <option value="Meeting">Встреча</option>
-                    <option value="Shopping">Покупки</option>
+                    <option value="Todo">Todo</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Meeting">Meeting</option>
+                    <option value="Shopping">Shopping</option>
                 </select>
             </div>
 
@@ -93,16 +95,16 @@ export default function NoteForm({ onClose }: NoteFormProps) {
                 <button
                     type="button"
                     className={css.cancelButton}
-                    onClick={handleCancel}
+                    onClick={() => router.back()}
                 >
-                    Отмена
+                    Cancel
                 </button>
                 <button
                     type="submit"
                     className={css.submitButton}
-                    disabled={mutation.status === "pending"}
+                    disabled={createNoteMutation.isPending}
                 >
-                    {mutation.status === "pending" ? "Создание..." : "Создать заметку"}
+                    {createNoteMutation.isPending ? "Creating..." : "Create note"}
                 </button>
             </div>
         </form>

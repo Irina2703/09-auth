@@ -21,7 +21,6 @@ export type LoginRequest = {
     password: string;
 };
 
-// ✅ Тип для создания заметки
 export type CreateNoteParams = {
     title: string;
     content: string;
@@ -35,11 +34,7 @@ export async function login(data: LoginRequest): Promise<User> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
     });
-
-    if (!res.ok) {
-        throw new Error("Invalid credentials");
-    }
-
+    if (!res.ok) throw new Error("Invalid credentials");
     return res.json();
 }
 
@@ -50,11 +45,7 @@ export async function register(data: RegisterRequest): Promise<User> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
     });
-
-    if (!res.ok) {
-        throw new Error("Registration failed");
-    }
-
+    if (!res.ok) throw new Error("Registration failed");
     return res.json();
 }
 
@@ -79,10 +70,30 @@ export async function createNote(data: CreateNoteParams): Promise<Note> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
     });
-
-    if (!res.ok) {
-        throw new Error("Failed to create note");
-    }
-
+    if (!res.ok) throw new Error("Failed to create note");
     return res.json();
+}
+
+// ✅ FETCH NOTES (добавлено)
+export async function fetchNotes(
+    page: number,
+    search: string,
+    tag?: string
+): Promise<NoteResponse> {
+    const params = new URLSearchParams({
+        page: String(page),
+        search,
+        ...(tag ? { tag } : {}),
+    });
+    const res = await fetch(`/api/notes?${params.toString()}`);
+    if (!res.ok) throw new Error("Failed to fetch notes");
+    return res.json();
+}
+
+// ✅ DELETE NOTE (добавлено)
+export async function deleteNote(id: string): Promise<void> {
+    const res = await fetch(`/api/notes/${id}`, {
+        method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Failed to delete note");
 }
