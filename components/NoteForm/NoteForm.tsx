@@ -1,15 +1,11 @@
 "use client";
 
-// Make sure useNoteStore is exported from noteStore.ts, or import the correct export
 import { useNoteStore } from "@/lib/store/noteStore";
-// If the export is default, use:
-// import useNoteStore from "@/lib/store/noteStore";
 import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { createNote } from "@/lib/api";
+import { createNote } from "@/lib/api/api";
 
-// Добавляем тип для тега
 type NoteTag = "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 
 type NoteFormProps = {
@@ -26,7 +22,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notes"] });
             clearDraft();
-            onClose(); // закрываем модалку после успешного создания
+            onClose();
         },
     });
 
@@ -45,7 +41,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Приводим tag к нужному типу перед отправкой
         mutation.mutate({
             ...draft,
             tag: draft.tag as NoteTag,
@@ -59,7 +54,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
     return (
         <form className={css.form} onSubmit={handleSubmit}>
             <div className={css.formGroup}>
-                <label htmlFor="title">Title</label>
+                <label htmlFor="title">Заголовок</label>
                 <input
                     id="title"
                     name="title"
@@ -69,7 +64,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             </div>
 
             <div className={css.formGroup}>
-                <label htmlFor="content">Content</label>
+                <label htmlFor="content">Содержание</label>
                 <textarea
                     id="content"
                     name="content"
@@ -80,17 +75,17 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             </div>
 
             <div className={css.formGroup}>
-                <label htmlFor="tag">Tag</label>
+                <label htmlFor="tag">Тег</label>
                 <select
                     name="tag"
                     value={draft.tag}
                     onChange={handleChange}
                 >
-                    <option value="Todo">Todo</option>
-                    <option value="Work">Work</option>
-                    <option value="Personal">Personal</option>
-                    <option value="Meeting">Meeting</option>
-                    <option value="Shopping">Shopping</option>
+                    <option value="Todo">Дела</option>
+                    <option value="Work">Работа</option>
+                    <option value="Personal">Личное</option>
+                    <option value="Meeting">Встреча</option>
+                    <option value="Shopping">Покупки</option>
                 </select>
             </div>
 
@@ -100,14 +95,14 @@ export default function NoteForm({ onClose }: NoteFormProps) {
                     className={css.cancelButton}
                     onClick={handleCancel}
                 >
-                    Cancel
+                    Отмена
                 </button>
                 <button
                     type="submit"
                     className={css.submitButton}
                     disabled={mutation.status === "pending"}
                 >
-                    {mutation.status === "pending" ? "Creating..." : "Create note"}
+                    {mutation.status === "pending" ? "Создание..." : "Создать заметку"}
                 </button>
             </div>
         </form>

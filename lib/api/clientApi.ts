@@ -21,6 +21,13 @@ export type LoginRequest = {
     password: string;
 };
 
+// ✅ Тип для создания заметки
+export type CreateNoteParams = {
+    title: string;
+    content: string;
+    tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
+};
+
 // ✅ LOGIN
 export async function login(data: LoginRequest): Promise<User> {
     const res = await fetch("/api/auth/login", {
@@ -62,5 +69,20 @@ export async function getTagsClient(): Promise<Tag[]> {
 export async function fetchNoteById(id: string): Promise<Note> {
     const res = await fetch(`/api/notes/${id}`);
     if (!res.ok) throw new Error("Failed to fetch note");
+    return res.json();
+}
+
+// ✅ CREATE NOTE
+export async function createNote(data: CreateNoteParams): Promise<Note> {
+    const res = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to create note");
+    }
+
     return res.json();
 }
