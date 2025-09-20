@@ -1,4 +1,4 @@
-import css from "./createNote.module.css";
+import css from "./CreateNote.module.css";
 
 import {
     dehydrate,
