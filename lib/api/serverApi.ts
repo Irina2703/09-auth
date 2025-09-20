@@ -4,6 +4,11 @@ import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
 import type { NoteResponse } from "./clientApi";
 
+export interface Tag {
+    id: string;
+    name: string;
+}
+
 async function getCookieHeader() {
     const cookieStore = await cookies();
     return cookieStore
@@ -14,20 +19,32 @@ async function getCookieHeader() {
 
 export async function checkServerSession() {
     const res = await nextServer.get("/auth/session", {
-        headers: {
-            Cookie: await getCookieHeader(),
-        },
+        headers: { Cookie: await getCookieHeader() },
     });
     return res;
 }
 
 export async function getServerMe() {
     const res = await nextServer.get<User>("/users/me", {
+        headers: { Cookie: await getCookieHeader() },
+    });
+    return res.data;
+}
+
+// 👇 серверная версия getTags
+export async function getTags(): Promise<Tag[]> {
+    const res = await nextServer.get<Tag[]>("/tags", {
         headers: {
+            "Content-Type": "application/json",
             Cookie: await getCookieHeader(),
         },
     });
     return res.data;
+}
+
+// 👇 алиас для getServerMe
+export async function getUserProfile(): Promise<User> {
+    return getServerMe();
 }
 
 export async function fetchServerNotes(
@@ -36,12 +53,7 @@ export async function fetchServerNotes(
     tag?: string
 ): Promise<NoteResponse> {
     const response = await nextServer.get<NoteResponse>("/notes", {
-        params: {
-            search: query,
-            tag,
-            page,
-            perPage: 12,
-        },
+        params: { search: query, tag, page, perPage: 12 },
         headers: {
             "Content-Type": "application/json",
             Cookie: await getCookieHeader(),

@@ -1,6 +1,9 @@
 "use client";
 
+// Make sure useNoteStore is exported from noteStore.ts, or import the correct export
 import { useNoteStore } from "@/lib/store/noteStore";
+// If the export is default, use:
+// import useNoteStore from "@/lib/store/noteStore";
 import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

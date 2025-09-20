@@ -3,8 +3,8 @@
 import css from "./SignInPage.module.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LoginRequest } from "@/types/auth";
-import { loginClient } from "@/lib/api/clientApi";
+import { LoginRequest } from "@/lib/api/clientApi";
+import { login } from "@/lib/api/clientApi";
 import { AxiosError } from "axios";
 import { useAuthStore } from "@/lib/store/authStore";
 
@@ -18,7 +18,7 @@ export default function SignIn() {
     const handleSubmit = async (formData: FormData) => {
         try {
             const formValues = Object.fromEntries(formData) as LoginRequest;
-            const res = await loginClient(formValues);
+            const res = await login(formValues); // ✅ вызываем login
             if (res) {
                 setUser(res);
                 router.push("/profile");
@@ -33,43 +33,42 @@ export default function SignIn() {
             );
         }
     };
+
     return (
-        <>
-            <main className={css.mainContent}>
-                <form className={css.form} action={handleSubmit}>
-                    <h1 className={css.formTitle}>Sign in</h1>
+        <main className={css.mainContent}>
+            <form className={css.form} action={handleSubmit}>
+                <h1 className={css.formTitle}>Sign in</h1>
 
-                    <div className={css.formGroup}>
-                        <label htmlFor="email">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            name="email"
-                            className={css.input}
-                            required
-                        />
-                    </div>
+                <div className={css.formGroup}>
+                    <label htmlFor="email">Email</label>
+                    <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        className={css.input}
+                        required
+                    />
+                </div>
 
-                    <div className={css.formGroup}>
-                        <label htmlFor="password">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            name="password"
-                            className={css.input}
-                            required
-                        />
-                    </div>
+                <div className={css.formGroup}>
+                    <label htmlFor="password">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        className={css.input}
+                        required
+                    />
+                </div>
 
-                    <div className={css.actions}>
-                        <button type="submit" className={css.submitButton}>
-                            Log in
-                        </button>
-                    </div>
+                <div className={css.actions}>
+                    <button type="submit" className={css.submitButton}>
+                        Log in
+                    </button>
+                </div>
 
-                    <p className={css.error}>{error}</p>
-                </form>
-            </main>
-        </>
+                {error && <p className={css.error}>{error}</p>}
+            </form>
+        </main>
     );
 }
