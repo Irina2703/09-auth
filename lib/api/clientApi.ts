@@ -74,7 +74,7 @@ export async function createNote(data: CreateNoteParams): Promise<Note> {
     return res.json();
 }
 
-// ✅ FETCH NOTES (добавлено)
+// ✅ FETCH NOTES
 export async function fetchNotes(
     page: number,
     search: string,
@@ -90,10 +90,39 @@ export async function fetchNotes(
     return res.json();
 }
 
-// ✅ DELETE NOTE (добавлено)
+// ✅ DELETE NOTE
 export async function deleteNote(id: string): Promise<void> {
     const res = await fetch(`/api/notes/${id}`, {
         method: "DELETE",
     });
     if (!res.ok) throw new Error("Failed to delete note");
+}
+
+// ✅ CHECK SESSION  🔹 добавлено
+export async function checkSession(): Promise<boolean> {
+    const res = await fetch("/api/auth/session", {
+        method: "GET",
+        credentials: "include", // чтобы cookie передавались
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return Boolean(data.authenticated);
+}
+
+// ✅ GET CURRENT USER  🔹 добавлено
+export async function getMe(): Promise<User | null> {
+    const res = await fetch("/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+    });
+    if (!res.ok) return null;
+    return res.json();
+}
+// ✅ LOGOUT
+export async function logout(): Promise<void> {
+    const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // чтобы отправились cookie
+    });
+    if (!res.ok) throw new Error("Logout failed");
 }
