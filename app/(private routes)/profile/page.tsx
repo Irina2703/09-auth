@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
             openGraph: {
                 title: `${user.username} - NoteHub`,
                 description: `Profile page of ${user.username}`,
-                url: `https://profile`,
+                url: `https://09-auth-eight-kappa.vercel.app/`,
                 images: [
                     {
                         url: user.avatar,
