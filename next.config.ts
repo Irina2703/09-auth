@@ -4,15 +4,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "ac.goit.global",
-      },
-      {
-        protocol: "https",
-        hostname: "09-auth-eight-kappa.vercel.app",
-      },
-    ],
-  },
+        protocol: 'https',
+        hostname: 'ac.goit.global',
+      }
+    ]
+  }
 };
 
 export default nextConfig;
