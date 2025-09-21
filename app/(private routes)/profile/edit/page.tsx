@@ -1,70 +1,70 @@
-import { Metadata } from "next";
-import css from "./profilePage.module.css";
-import Link from "next/link";
-import Image from "next/image";
-import { User } from "@/types/user";
-import { getUserProfile } from "@/lib/api/serverApi";
+"use client";
 
-export const metadata: Metadata = {
-    title: "Note Hub. Your Profile",
-    description: "Personal profile for making notes",
-    openGraph: {
-        title: "Note Hub. Your Profile",
-        description: "Personal profile for making notes",
-        images: [
-            {
-                url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
-                width: 1200,
-                height: 630,
-                alt: "Note Hub Logo",
-            },
-        ],
-    },
-};
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getMe, login, register, updateProfile } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
 
-export default async function Profile() {
-    let user: User | null = null;
+export default function EditProfilePage() {
+    const router = useRouter();
+    const { user, setUser } = useAuthStore();
+    const [username, setUsername] = useState(user?.username || "");
+    const [email, setEmail] = useState(user?.email || "");
+    const [loading, setLoading] = useState(false);
 
-    try {
-        user = await getUserProfile();
-    } catch (err) {
-        console.error("Failed to fetch user profile:", err);
-    }
+    useEffect(() => {
+        if (!user) {
+            getMe().then((u) => {
+                if (u) {
+                    setUser(u);
+                    setUsername(u.username);
+                    setEmail(u.email);
+                }
+            });
+        }
+    }, [user, setUser]);
 
-    if (!user) {
-        return (
-            <main className={css.mainContent}>
-                <p>Please log in to see your profile.</p>
-                <Link href="/sign-in">Go to Login</Link>
-            </main>
-        );
-    }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const updatedUser = await updateProfile({ username, email });
+            setUser(updatedUser);
+            router.push("/profile");
+        } catch (err) {
+            console.error("Failed to update profile:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <main className={css.mainContent}>
-            <div className={css.profileCard}>
-                <div className={css.header}>
-                    <h1 className={css.formTitle}>Profile Page</h1>
-                    <Link href="/profile/edit" className={css.editProfileButton}>
-                        Edit Profile
-                    </Link>
-                </div>
-
-                <div className={css.avatarWrapper}>
-                    <Image
-                        src="https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"
-                        alt="User Avatar"
-                        width={150}
-                        height={150}
-                        className={css.avatar}
+        <main>
+            <h1>Edit Profile</h1>
+            <form onSubmit={handleSubmit}>
+                <label>
+                    Username:
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
-                </div>
-
-                <div className={css.profileInfo}>
-                    <p>Username: {user.username || "N/A"}</p>
-                    <p>Email: {user.email}</p>
-                </div>
-            </div>
+                </label>
+                <label>
+                    Email:
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </label>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Saving..." : "Save"}
+                </button>
+                <button type="button" onClick={() => router.back()}>
+                    Cancel
+                </button>
+            </form>
         </main>
     );
 }

@@ -1,6 +1,8 @@
+import { nextServer } from "./api";
 import type { User } from "@/types/user";
 import type { Note } from "@/types/note";
 
+// ✅ Типи
 export interface Tag {
     id: string;
     name: string;
@@ -11,70 +13,68 @@ export interface NoteResponse {
     totalPages: number;
 }
 
-export type RegisterRequest = {
-    email: string;
-    password: string;
-};
-
-export type LoginRequest = {
-    email: string;
-    password: string;
-};
-
+export type LoginRequest = { email: string; password: string };
+export type RegisterRequest = { email: string; password: string };
 export type CreateNoteParams = {
     title: string;
     content: string;
     tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 };
 
-// ✅ LOGIN
+export type UpdateProfileParams = {
+    username: string;
+    email: string;
+};
+
+// ✅ AUTH
 export async function login(data: LoginRequest): Promise<User> {
-    const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error("Invalid credentials");
-    return res.json();
+    const res = await nextServer.post<User>("/auth/login", data);
+    return res.data;
 }
 
-// ✅ REGISTER
 export async function register(data: RegisterRequest): Promise<User> {
-    const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error("Registration failed");
-    return res.json();
+    const res = await nextServer.post<User>("/auth/register", data);
+    return res.data;
 }
 
-// ✅ FETCH TAGS
-export async function getTagsClient(): Promise<Tag[]> {
-    const res = await fetch("/api/tags");
-    if (!res.ok) throw new Error("Failed to fetch tags");
-    return res.json();
+export async function getMe(): Promise<User | null> {
+    try {
+        const res = await nextServer.get<User>("/users/me");
+        return res.data;
+    } catch {
+        return null;
+    }
 }
 
-// ✅ FETCH NOTE BY ID
-export async function fetchNoteById(id: string): Promise<Note> {
-    const res = await fetch(`/api/notes/${id}`);
-    if (!res.ok) throw new Error("Failed to fetch note");
-    return res.json();
+export async function updateProfile(data: UpdateProfileParams): Promise<User> {
+    const res = await nextServer.put<User>("/users/me", data);
+    return res.data;
 }
 
-// ✅ CREATE NOTE
+export async function logout(): Promise<void> {
+    await nextServer.post("/auth/logout");
+}
+
+export async function checkSession(): Promise<boolean> {
+    try {
+        const res = await nextServer.get("/auth/session");
+        return Boolean(res.data.authenticated);
+    } catch {
+        return false;
+    }
+}
+
+// ✅ NOTES
 export async function createNote(data: CreateNoteParams): Promise<Note> {
-    const res = await fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error("Failed to create note");
-    return res.json();
+    const res = await nextServer.post<Note>("/notes", data);
+    return res.data;
 }
 
-// ✅ FETCH NOTES
+export async function fetchNoteById(id: string): Promise<Note> {
+    const res = await nextServer.get<Note>(`/notes/${id}`);
+    return res.data;
+}
+
 export async function fetchNotes(
     page: number,
     search: string,
@@ -85,44 +85,17 @@ export async function fetchNotes(
         search,
         ...(tag ? { tag } : {}),
     });
-    const res = await fetch(`/api/notes?${params.toString()}`);
-    if (!res.ok) throw new Error("Failed to fetch notes");
-    return res.json();
+    const res = await nextServer.get<NoteResponse>(`/notes?${params.toString()}`);
+    return res.data;
 }
 
-// ✅ DELETE NOTE
-export async function deleteNote(id: string): Promise<void> {
-    const res = await fetch(`/api/notes/${id}`, {
-        method: "DELETE",
-    });
-    if (!res.ok) throw new Error("Failed to delete note");
+export async function deleteNote(id: string): Promise<Note> {
+    const res = await nextServer.delete<Note>(`/notes/${id}`);
+    return res.data;
 }
 
-// ✅ CHECK SESSION  🔹 добавлено
-export async function checkSession(): Promise<boolean> {
-    const res = await fetch("/api/auth/session", {
-        method: "GET",
-        credentials: "include", // чтобы cookie передавались
-    });
-    if (!res.ok) return false;
-    const data = await res.json();
-    return Boolean(data.authenticated);
-}
-
-// ✅ GET CURRENT USER  🔹 добавлено
-export async function getMe(): Promise<User | null> {
-    const res = await fetch("/api/auth/me", {
-        method: "GET",
-        credentials: "include",
-    });
-    if (!res.ok) return null;
-    return res.json();
-}
-// ✅ LOGOUT
-export async function logout(): Promise<void> {
-    const res = await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include", // чтобы отправились cookie
-    });
-    if (!res.ok) throw new Error("Logout failed");
+// ✅ TAGS (за потреби)
+export async function getTagsClient(): Promise<Tag[]> {
+    const res = await nextServer.get<Tag[]>("/tags");
+    return res.data;
 }
